@@ -1015,13 +1015,33 @@ function confirmDeleteFile() {
 /**tạo mới thư mục */
 function createFolder() {
   /** bật cờ đang chạy */
-  is_loading.value = true
+  is_loading.value = true /** Lấy dữ liệu từ localStorage */
+  const PAGE_ID_MAP = getItem('album_page_id') || {}
+  /** ID mặc định */
+  const DEFAULT_ID = conversationStore.select_conversation?.fb_page_id || ''
+
+  /** ✅ Xác định NEW_PAGE_ID */
+  let new_page_id = DEFAULT_ID
+
+  if (Object.keys(PAGE_ID_MAP).length > 0) {
+    if (PAGE_ID_MAP[DEFAULT_ID] && PAGE_ID_MAP[DEFAULT_ID].length > 0) {
+      /** 🟢 Nếu map có chứa DEFAULT_ID → lấy phần tử đầu tiên của mảng đó */
+      new_page_id = PAGE_ID_MAP[DEFAULT_ID][0]
+    } else {
+      /** 🟡 Nếu không chứa DEFAULT_ID → lấy phần tử đầu tiên của map */
+      const FIRST_KEY = Object.keys(PAGE_ID_MAP)[0]
+      const FIRST_ARRAY = PAGE_ID_MAP[FIRST_KEY]
+      if (Array.isArray(FIRST_ARRAY) && FIRST_ARRAY.length > 0) {
+        new_page_id = FIRST_ARRAY[0]
+      }
+    }
+  }
 
   /** tạo thư mục */
   create_folder_album(
     {
       // page_id: conversationStore.select_conversation?.fb_page_id as string,
-      page_id: page_id.value,
+      page_id: new_page_id,
       title: $t('v1.view.main.dashboard.chat.album.folder_new_name'),
     },
     (e, r) => {
@@ -1096,12 +1116,37 @@ function updateFolderInfo(folder: FolderInfo) {
 
   /** gắn cờ đang chạy */
   is_loading.value = true
+  /** Lấy dữ liệu từ localStorage */
+  const PAGE_ID_MAP = getItem('album_page_id') || {}
+  /** ID mặc định */
+  const DEFAULT_ID = conversationStore.select_conversation?.fb_page_id || ''
+
+  /** ✅ Xác định NEW_PAGE_ID */
+  let new_page_id = DEFAULT_ID
+
+  console.log(new_page_id, 'new page id')
+
+  console.log(folder, 'folder')
+
+  if (Object.keys(PAGE_ID_MAP).length > 0) {
+    if (PAGE_ID_MAP[DEFAULT_ID] && PAGE_ID_MAP[DEFAULT_ID].length > 0) {
+      /** 🟢 Nếu map có chứa DEFAULT_ID → lấy phần tử đầu tiên của mảng đó */
+      new_page_id = PAGE_ID_MAP[DEFAULT_ID][0]
+    } else {
+      /** 🟡 Nếu không chứa DEFAULT_ID → lấy phần tử đầu tiên của map */
+      const FIRST_KEY = Object.keys(PAGE_ID_MAP)[0]
+      const FIRST_ARRAY = PAGE_ID_MAP[FIRST_KEY]
+      if (Array.isArray(FIRST_ARRAY) && FIRST_ARRAY.length > 0) {
+        new_page_id = FIRST_ARRAY[0]
+      }
+    }
+  }
 
   /** cập nhật thông tin thư mục */
   update_folder_album(
     {
       // page_id: conversationStore.select_conversation?.fb_page_id as string,
-      page_id: page_id.value,
+      page_id: folder.fb_page_id || new_page_id,
       folder_id: folder?._id,
       title: folder?.title,
     },
