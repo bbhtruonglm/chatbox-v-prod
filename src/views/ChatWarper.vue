@@ -122,6 +122,7 @@ watch(
 onMounted(() => {
   checkOverLimit()
 
+  // $main.getPageInfoToChat()
   $main.getPageInfoToChat()
 
   $main.getPageOfCurrentOrg()
@@ -235,7 +236,7 @@ function initExtensionLogic() {
       // nạp thông tin khách hàng
       if (r?.info) {
         // nếu có thông tin khách hàng thì bật cờ có thông tin mới lên
-        if(conversationStore.select_conversation) {
+        if (conversationStore.select_conversation) {
           conversationStore.select_conversation.has_new_info_from_ext = true
         }
 
@@ -631,7 +632,12 @@ class Main {
       throw $t('v1.view.main.dashboard.chat.error.get_org_info')
 
     /**dữ liệu các trang đang chọn */
-    const PAGES = await new N4SerivceAppPage().getPageInfoToChat(
+    // const PAGES_OLD = await new N4SerivceAppPage().getPageInfoToChat(
+    //   orgStore.selected_org_id,
+    //   SELECTED_PAGE_IDS,
+    //   true
+    // )
+    const PAGES = await new N4SerivceAppPage().getPageDetails(
       orgStore.selected_org_id,
       SELECTED_PAGE_IDS,
       true
@@ -660,21 +666,21 @@ class Main {
 
   /** lấy danh sách trang của tổ chức hiện tại */
   async getPageOfCurrentOrg() {
-    // nếu không có id tổ chức thì thôi
+    /** nếu không có id tổ chức thì thôi */
     if (!orgStore.selected_org_id) return
 
     /**lấy danh sách trang của tổ chức hiện tại */
     const OSS = await read_os(orgStore.selected_org_id)
 
-    // lưu danh sách các trang của tổ chức hiện tại vào store
+    /** lưu danh sách các trang của tổ chức hiện tại vào store */
     orgStore.list_os = OSS
 
-    // lọc ra các trang zalo cá nhân
+    /** lọc ra các trang zalo cá nhân */
     this.markOrgHaveZalo(OSS)
   }
 
   /**đánh dấu xem tổ chức này có page zalo không */
-  markOrgHaveZalo(oss: OwnerShipInfo[]){
+  markOrgHaveZalo(oss: OwnerShipInfo[]) {
     /**lọc ra các trang zalo cá nhân */
     pageStore.zlp_oss = oss.filter(
       os => os?.page_info?.type === 'ZALO_PERSONAL'

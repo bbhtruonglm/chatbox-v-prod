@@ -39,13 +39,18 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useCommonStore, useOrgStore } from '@/stores'
-import { get_noti, read_noti } from '@/service/api/chatbox/billing'
+import {
+  get_all_noti,
+  get_noti,
+  read_noti,
+} from '@/service/api/chatbox/billing'
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ToastSingleton } from '@/utils/helper/Alert/Toast'
 import { useRouter } from 'vue-router'
 
 import type { NotiInfo } from '@/service/interface/app/billing'
+import { isEmpty } from 'lodash'
 
 const $props = withDefaults(
   defineProps<{
@@ -150,7 +155,7 @@ const list_noti = ref<NotiInfo[]>([])
 const is_loading = ref(false)
 
 // đọc danh sách thông báo khi load component
-onMounted(getNoti)
+// onMounted(getNoti)
 
 watch(
   () => [
@@ -174,12 +179,14 @@ async function getNoti() {
   try {
     // nếu không phải chọn tất cả các tổ chức thì chỉ lấy của tổ chức đang chọn
     // hoặc đang trong chat thì cũng chỉ lấy của tổ chức hiện tại
-    if (!orgStore.is_selected_all_org || $props.is_chat) {
-      list_noti.value = await getNotiCurrentOrg()
-    } else {
-      // lấy tất cả các thông báo
-      list_noti.value = await getAllNoti()
-    }
+    // if (!orgStore.is_selected_all_org || $props.is_chat) {
+    //   list_noti.value = await getNotiCurrentOrg()
+    // } else {
+    //   // lấy tất cả các thông báo
+    // }
+
+    /** call noti theo list org (không tách từng tổ chức nữa) */
+    list_noti.value = await getAllNoti()
 
     // nếu trong chat thì sau 2s thì xóa thông báo
     if (!$props.is_chat) return
@@ -200,21 +207,27 @@ async function getAllNoti() {
     /** danh sách các tổ chức */
     const LIST_ORG = orgStore.list_org || []
 
-    // lặp qua từng tổ chức để lấy danh sách các thông báo
-    for (const org of LIST_ORG) {
-      // nếu không có id tổ chức thì thôi qua tổ chức tiếp theo
-      if (!org.org_id) continue      
+    /** lặp qua từng tổ chức để lấy danh sách các thông báo */
+    // for (const org of LIST_ORG) {
+    //   // nếu không có id tổ chức thì thôi qua tổ chức tiếp theo
+    //   if (!org.org_id) continue
 
-      /** dữ liệu api trả về */
-      const RES = await get_noti(
-        org.org_id,
-        3,
-        { $exists: false },
-        $props.codes
-      )
-      // thêm vào cuối danh sách
-      list_noti = [...list_noti, ...RES]
-    }
+    //   /** dữ liệu api trả về */
+    //   const RES = await get_noti(
+    //     org.org_id,
+    //     3,
+    //     { $exists: false },
+    //     $props.codes
+    //   )
+    //   // thêm vào cuối danh sách
+    //   list_noti = [...list_noti, ...RES]
+    // }
+
+    const ORG_IDS = LIST_ORG.map(item => item.org_id || '')
+    if (isEmpty(ORG_IDS)) return
+    const RES = await get_all_noti(ORG_IDS, 3, { $exists: false }, $props.codes)
+    // thêm vào cuối danh sách
+    list_noti = RES
   } catch (e) {
   } finally {
     return list_noti

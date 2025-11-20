@@ -1,12 +1,12 @@
-import { N4Serivce } from '@/utils/api/N4Serivce'
-
 import type {
   IPage,
   PageList,
   PageWebsiteCreate,
 } from '@/service/interface/app/page'
+
 import type { AllStaffList } from '@/service/interface/app/staff'
 import type { LocationQueryValue } from 'vue-router'
+import { N4Serivce } from '@/utils/api/N4Serivce'
 import { singleton } from 'tsyringe'
 
 /**dữ liệu của trang hiện tại kích hoạt */
@@ -33,7 +33,7 @@ export class N4SerivceAppPage extends N4Serivce {
     return this.post('get_current_page', body)
   }
   /**
-   * đọc danh sách trang đang kích hoạt của tổ chức 
+   * đọc danh sách trang đang kích hoạt của tổ chức
    * @param org_id id tổ chức
    * @param group_id lọc theo id nhóm
    */
@@ -107,6 +107,27 @@ export class N4SerivceAppPage extends N4Serivce {
       {
         org_id,
         list_page_id: page_ids,
+      },
+      is_raw_error
+    )
+  }
+  /**
+   * lấy dữ liệu page, widget, staff, user, ... của các page liên quan cần chat
+   * @param org_id id tổ chức
+   * @param page_ids danh sách id trang
+   * @param is_raw_error trả về dữ liệu lỗi nguyên bản
+   */
+  public async getPageDetails(
+    org_id: string,
+    page_ids: string[],
+    is_raw_error?: boolean
+  ): Promise<PageList> {
+    // gọi api
+    return this.post(
+      'get_pages_details',
+      {
+        org_id,
+        page_ids: page_ids,
       },
       is_raw_error
     )
