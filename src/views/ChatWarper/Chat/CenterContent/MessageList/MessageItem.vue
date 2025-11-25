@@ -91,6 +91,26 @@
       :sender_id="message.sender_id"
       :message_type="message.message_type"
     />
+    <MessageReaction
+      :class="{
+        'right-0': message_type !== 'client',
+      }"
+      :time="message_time"
+      :meta="meta"
+      :is_ai="messageStore.isAiMessage(message)"
+      :is_edit="message?.is_edit"
+      :duration="CHECK_SLOW_REPLY.getDuration()"
+      :is_show_duration="
+        CHECK_SLOW_REPLY.isShowDuration() &&
+        !CHECK_SLOW_REPLY.isSlowReply() &&
+        !CHECK_SLOW_REPLY.isSystemSlowReply()
+      "
+      :group_client_name="message.group_client_name"
+      :platform_type="message.platform_type"
+      :fb_page_id="message.fb_page_id"
+      :sender_id="message.sender_id"
+      :message_type="message.message_type"
+    />
     <!-- :sender_id="message.sender_id" -->
   </div>
 </template>
@@ -120,6 +140,7 @@ import type {
 } from '@/service/interface/app/message'
 import { composableService } from '@/views/ChatWarper/Chat/CenterContent/MessageList/service'
 import { container } from 'tsyringe'
+import MessageReaction from './MessageReaction.vue'
 
 const { MessageService } = composableService()
 
