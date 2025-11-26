@@ -175,6 +175,9 @@ const source: Language = {
       warning: 'Cảnh báo',
       share_message: 'Chuyển tiếp tin nhắn',
       share_to: 'Chia sẻ tin nhắn',
+      sharing_content: 'Nội dung chia sẻ',
+      enter_sharing_content: 'Nhập nội dung chia sẻ',
+      attachments: 'File đính kèm',
     },
     view: {
       network: {

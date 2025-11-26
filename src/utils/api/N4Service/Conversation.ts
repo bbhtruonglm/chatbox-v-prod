@@ -132,13 +132,14 @@ export class N4SerivceAppConversation extends N4Serivce {
     // trả về hội thoại tìm thấy
     return RES?.conversation?.[KEY]
   }
+
   /**xóa câu trả lời ai của hội thoại */
   async clearAiAnswer(page_id: string, client_id: string): Promise<void> {
     return this.post('clear_ai_answer', { page_id, client_id })
   }
 
-  /** 
-   * lấy số lượng hội thoại 
+  /**
+   * lấy số lượng hội thoại
    * @param page_ids danh sách id trang
    * @param filter điều kiện lọc
    * @returns
@@ -147,9 +148,9 @@ export class N4SerivceAppConversation extends N4Serivce {
     page_ids: string[],
     filter: FilterConversation
   ): Promise<number> {
-    return this.post('count_conversation', { 
+    return this.post('count_conversation', {
       page_id: page_ids,
-      ...filter
+      ...filter,
     })
   }
 
@@ -160,6 +161,41 @@ export class N4SerivceAppConversation extends N4Serivce {
     is_disable: boolean,
     bot_resume_after?: number
   ): Promise<ConversationInfo> {
-    return this.post('manage_chatbot', { page_id, client_id, is_disable, bot_resume_after })
+    return this.post('manage_chatbot', {
+      page_id,
+      client_id,
+      is_disable,
+      bot_resume_after,
+    })
+  }
+}
+@singleton()
+export class N4SerivceAppMessage extends N4Serivce {
+  constructor() {
+    super('app/message')
+  }
+
+  /**
+   * gửi emoji vào hội thoại
+   * @param page_id id trang
+   * @param client_id id khách hàng
+   * @param emoji emoji
+   * @param message_mid id tin nhắn
+   */
+  async sendReaction(
+    page_id: string,
+    client_id: string,
+    emoji: string,
+    message_mid: string
+  ): Promise<any> {
+    /**dữ liệu hội thoại */
+    const RES: QueryConversationResponse = await this.post('reaction_message', {
+      page_id: page_id,
+      client_id,
+      message_mid,
+      reaction: emoji,
+    })
+
+    return RES
   }
 }

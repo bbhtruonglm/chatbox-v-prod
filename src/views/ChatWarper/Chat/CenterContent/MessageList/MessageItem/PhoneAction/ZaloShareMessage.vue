@@ -12,7 +12,7 @@
 
     <template #body>
       <div class="flex gap-2 overflow-hidden">
-        <div class="bg-white h-full w-full rounded-md p-2 flex flex-col gap-4">
+        <div class="bg-white h-full w-1/2 rounded-md p-2 flex flex-col gap-2">
           <!-- Search member -->
           <div class="relative">
             <MagnifyingGlassIcon
@@ -41,7 +41,7 @@
             </span>
           </div> -->
           <div
-            class="flex items-center justify-between p-2 border-b border-slate-100 hover:bg-slate-50 cursor-pointer"
+            class="flex items-center justify-between p-2 hover:bg-slate-50 cursor-pointer"
             @click="select_all()"
           >
             <div class="flex items-center gap-4">
@@ -50,7 +50,7 @@
                 :checked="
                   selected_members.length === FILTERED_CONVERSATION.length
                 "
-                class="h-4 w-4 text-blue-600"
+                class="h-4 w-4 text-blue-600 flex-shrink-0"
               />
 
               <div>
@@ -66,34 +66,40 @@
           </div>
 
           <!-- List conversation -->
-          <div class="flex-1 overflow-y-auto border-t border-slate-200 pt-2">
+          <div
+            class="flex flex-col overflow-y-auto border-t border-slate-200 pt-2 h-full"
+          >
             <div
               v-for="(conv, index) in FILTERED_CONVERSATION"
               :key="conv.fb_client_id + '_' + conv.fb_page_id"
               class="flex items-center justify-between p-2 border-b border-slate-100 hover:bg-slate-50 cursor-pointer"
               @click="toggleMember(conv)"
             >
-              <div class="flex items-center gap-4">
+              <div class="flex items-center gap-4 flex-1 min-w-0">
                 <input
                   type="checkbox"
                   :checked="selected_members.includes(conv)"
-                  class="h-4 w-4 text-blue-600"
+                  class="h-4 w-4 text-blue-600 flex-shrink-0"
                 />
-                <img
+                <!-- <img
                   :src="conv.client_avatar"
                   alt=""
                   class="size-10 rounded-full"
-                />
-                <div>
-                  <p class="text-sm font-medium flex items-center gap-1">
+                /> -->
+                <ClientAvatar :source="conv" />
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-1">
                     <span
                       class="flex text-xs justify-center items-center flex-shrink-0 h-5 rounded-full p-1 bg-blue-50 text-blue-700"
                     >
-                      {{ index + 1 }} </span
-                    >{{ conv.client_name }}
-                  </p>
-                  <p class="text-xs text-slate-500">
-                    {{ conv.client_phone || '-' }}
+                      {{ index + 1 }}
+                    </span>
+                    <p class="text-sm font-medium truncate">
+                      {{ conv.client_name }}
+                    </p>
+                  </div>
+                  <p class="text-xs text-slate-500 line-clamp-1">
+                    {{ conv.last_message || '-' }}
                   </p>
                 </div>
               </div>
@@ -106,8 +112,29 @@
               {{ $t('v1.common.no_data') }}
             </div>
           </div>
+
+          <div class="flex flex-col gap-2 text-sm">
+            <div>
+              {{ $t('v1.common.sharing_content') }}:
+              <span
+                v-if="sending_media.length > 0 && sending_media?.[0].type"
+                >{{ $t('v1.common.attachments') }}</span
+              >
+            </div>
+            <div>
+              <div>
+                <textarea
+                  v-model="sending_message"
+                  class="w-full border border-slate-200 h-20 rounded-md p-2 placeholder-slate-500"
+                  :placeholder="$t('v1.common.enter_sharing_content')"
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="bg-white h-full w-full rounded-md p-2 flex flex-col">
+        <div
+          class="bg-white h-full w-1/2 rounded-md p-2 flex flex-col justify-between"
+        >
           <!-- Selected info -->
           <div
             class="flex w-full gap-2 items-center justify-between text-xs pb-2"
@@ -129,7 +156,7 @@
           </div>
 
           <!-- List conversation -->
-          <div class="flex-1 overflow-y-auto py-2">
+          <div class="flex flex-col overflow-y-auto py-2 h-full">
             <div
               v-for="conv in selected_members"
               :key="conv.fb_client_id + '_' + conv.fb_page_id"
@@ -140,17 +167,16 @@
                 <input
                   type="checkbox"
                   :checked="selected_members.includes(conv)"
-                  class="h-4 w-4 text-blue-600"
+                  class="h-4 w-4 text-blue-600 flex-shrink-0"
                 />
-                <img
-                  :src="conv.client_avatar"
-                  alt=""
-                  class="size-10 rounded-full"
-                />
+
+                <ClientAvatar :source="conv" />
                 <div>
-                  <p class="text-sm font-medium">{{ conv.client_name }}</p>
-                  <p class="text-xs text-slate-500">
-                    {{ conv.client_phone || '-' }}
+                  <p class="text-sm font-medium line-clamp-1">
+                    {{ conv.client_name }}
+                  </p>
+                  <p class="text-xs text-slate-500 line-clamp-1">
+                    {{ conv.last_message || '-' }}
                   </p>
                 </div>
               </div>
@@ -189,23 +215,48 @@
 
 <script setup lang="ts">
 import { container } from 'tsyringe'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import Modal from '@/components/Modal.vue'
 import type {
   FilterConversation,
   QueryConversationResponse,
 } from '@/service/interface/app/conversation'
-import { useConversationStore, useOrgStore, usePageStore } from '@/stores'
+import {
+  useConversationStore,
+  useMessageStore,
+  useOrgStore,
+  usePageStore,
+} from '@/stores'
 import { N13ZaloPersonal } from '@/utils/api/N13ZaloPersonal'
 import { N4SerivceAppConversation } from '@/utils/api/N4Service/Conversation'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { keys } from 'lodash'
 
+import ClientAvatar from '@/views/ChatWarper/Chat/LeftBar/Conversation/ClientAvatar.vue'
+import { storeToRefs } from 'pinia'
+import type {
+  AttachmentInfo,
+  MessageInfo,
+} from '@/service/interface/app/message'
 /** Stores quản lý org và page */
 const orgStore = useOrgStore()
 const pageStore = usePageStore()
 const conversationStore = useConversationStore()
+const { message_data } = storeToRefs(useMessageStore())
+
+const sending_media = ref<AttachmentInfo[]>([])
+
+const sending_message = ref<string>('')
+
+watch(
+  () => message_data.value,
+  newVal => {
+    console.log('newVal', newVal)
+    sending_message.value = newVal?.message_text || ''
+    sending_media.value = newVal?.message_attachments || []
+  }
+)
 
 /** UI state */
 /** Tên group Zalo muốn tạo */
@@ -356,7 +407,8 @@ async function fetchAllConversations() {
     if (RES?.result?.length) {
       conversations.value.push(...RES.result)
       after_cursor.value = RES.after || undefined
-      keep_fetching = !!after_cursor.value
+      // keep_fetching = !!after_cursor.value
+      keep_fetching = false
     } else {
       /** Nếu không có dữ liệu nữa thì dừng loop */
       keep_fetching = false
@@ -461,7 +513,7 @@ function select_all() {
     return
   }
   /** Nếu chưa chọn tất cả thì chọn tất cả */
-  selected_members.value = FILTERED_CONVERSATION.value
+  selected_members.value = [...FILTERED_CONVERSATION.value]
 }
 
 /** Expose toggleModal ra component cha để gọi trực tiếp */

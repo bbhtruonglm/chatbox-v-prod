@@ -19,7 +19,7 @@
         @click="
           () => {
             modal_zalo_share_message_ref?.toggleModal()
-            message_data = undefined
+            message_data = message
           }
         "
         class="hover:bg-slate-300 rounded-lg p-0.5"

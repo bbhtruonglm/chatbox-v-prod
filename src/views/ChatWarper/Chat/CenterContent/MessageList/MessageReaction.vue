@@ -1,32 +1,29 @@
 <template>
   <div
     id="chat__message-reaction"
-    class="text-xxs text-slate-500 absolute group w-max z-20 -bottom-4"
-    :class="sender_id === fb_page_id ? 'right-0' : 'left-0'"
+    class="text-xxs text-slate-500 absolute group w-max z-20 -top-2.5 px-1"
+    :class="sender_id === fb_page_id ? '-left-[64px]' : '-right-[64px]'"
   >
     <!-- Trigger icon -->
-    <span
-      class="flex items-center justify-center cursor-pointer text-base rounded-full relative opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-      :class="[
+    <!-- :class="[
         selected_reaction
           ? 'px-3 py-0.5 bg-white border border-slate-200 rounded-full opacity-100'
           : 'px-3 py-1 bg-white border border-slate-200 rounded-full',
-      ]"
+      ]" -->
+    <span
+      class="flex items-center justify-center cursor-pointer text-base rounded-full relative opacity-0 group-hover:opacity-100 transition-opacity duration-150 px-3 py-0.5 bg-white border border-slate-200 rounded-full"
       @mouseenter="openReactions"
       @mouseleave="closeReactions"
       ref="trigger_icon"
     >
       <!-- Nếu đã chọn reaction, hiện emoji UTF-8, ngược lại Lucide icon -->
-      <span
+      <!-- <span
         v-if="selected_reaction"
         class="text-sm flex items-center justify-center gap-1"
       >
         {{ selected_reaction.map(r => r.icon).join(' ') }}
-      </span>
-      <ThumbsUpIcon
-        v-else
-        class="size-3 text-blue-500"
-      />
+      </span> -->
+      <ThumbsUpIcon class="size-3 text-blue-500" />
 
       <!-- Reaction popup: hiện khi hover trigger icon -->
       <div
@@ -51,8 +48,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import type { MessageInfo } from '@/service/interface/app/message'
+import { N4SerivceAppMessage } from '@/utils/api/N4Service/Conversation'
 import { ThumbsUpIcon } from 'lucide-vue-next'
+import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 /** Trạng thái mở popup reaction */
 const is_open = ref(false)
@@ -65,6 +65,8 @@ const popup_style = ref({} as any)
 
 /** Ref tới icon để tính vị trí hiển thị popup */
 const trigger_icon = ref<HTMLElement | null>(null)
+
+const $route = useRoute()
 
 /**
  * Danh sách reaction user đã chọn:
@@ -91,7 +93,7 @@ const MAIN_REACTIONS: Reaction[] = [
   { code: '/-heart', icon: '❤️', color: '#ffffff' },
   { code: ':>', icon: '😆', color: '#ffffff' },
   { code: ':o', icon: '😮', color: '#ffffff' },
-  { code: '/-bome', icon: '😢', color: '#ffffff' },
+  { code: ':-((', icon: '😢', color: '#ffffff' },
   { code: ':-h', icon: '😡', color: '#ffffff' },
 ]
 
@@ -144,24 +146,30 @@ function updatePopupPosition() {
  * - Nếu chọn rồi → gỡ
  * - Nếu gỡ hết → reset về null
  */
-function selectReaction(reaction: Reaction) {
-  if (!selected_reaction.value) {
-    selected_reaction.value = [reaction]
-  } else {
-    const index = selected_reaction.value.findIndex(
-      r => r.code === reaction.code
-    )
+async function selectReaction(reaction: Reaction) {
+  await new N4SerivceAppMessage().sendReaction(
+    $props.fb_page_id || '',
+    $route.query.user_id?.toString() || '',
+    reaction.code,
+    $props.message?.message_mid || ''
+  )
+  // if (!selected_reaction.value) {
+  //   selected_reaction.value = [reaction]
+  // } else {
+  //   const index = selected_reaction.value.findIndex(
+  //     r => r.code === reaction.code
+  //   )
 
-    if (index === -1) {
-      selected_reaction.value.push(reaction)
-    } else {
-      selected_reaction.value.splice(index, 1)
+  //   if (index === -1) {
+  //     selected_reaction.value.push(reaction)
+  //   } else {
+  //     selected_reaction.value.splice(index, 1)
 
-      if (selected_reaction.value.length === 0) {
-        selected_reaction.value = null
-      }
-    }
-  }
+  //     if (selected_reaction.value.length === 0) {
+  //       selected_reaction.value = null
+  //     }
+  //   }
+  // }
 
   console.log('Selected reactions:', selected_reaction.value)
 
@@ -174,6 +182,8 @@ const $props = withDefaults(
   defineProps<{
     sender_id?: string
     fb_page_id?: string
+    /** dữ liệu tin nhắn */
+    message?: MessageInfo
   }>(),
   {}
 )

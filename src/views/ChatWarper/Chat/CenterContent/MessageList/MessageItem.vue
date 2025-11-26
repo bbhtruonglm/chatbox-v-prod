@@ -92,7 +92,7 @@
       :message_type="message.message_type"
     />
     <MessageReaction
-    v-if="
+      v-if="
         message_type === 'client' ||
         message_type === 'page' ||
         message_type === 'group'
@@ -102,6 +102,7 @@
       }"
       :fb_page_id="message.fb_page_id"
       :sender_id="message.sender_id"
+      :message="message"
     />
     <MessageOtherAction
       v-if="
