@@ -95,12 +95,13 @@ export function usePageManager() {
       /**toàn bộ các trang của người dùng */
 
       const PAGE_DATA_2 = await new N4SerivceAppPage().getListActivePage({})
+      // const PAGE_DATA = await new N4SerivceAppPage().getListPage({})
 
       // nếu không có dữ liệu trang thì thôi
       if (isEmpty(PAGE_DATA_2)) return
 
       // lưu trữ dữ liệu trang
-      // pageStore.all_page_list = PAGE_DATA?.page_list
+      // pageStore.all_page_list = PAGE_DATA?.page_list || {}
       pageStore.all_page_list = mapValues(PAGE_DATA_2, item => {
         return {
           group_admin_id: '', // mặc định
