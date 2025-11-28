@@ -58,6 +58,14 @@
       @error="onImageError"
       @load="removeAnimatePulse"
       loading="lazy"
+      v-if="conversation?.platform_type === 'TIKTOK'"
+      :src="loadImageUrl(conversation?.platform_type)"
+      class="w-full h-full"
+    />
+    <img
+      @error="onImageError"
+      @load="removeAnimatePulse"
+      loading="lazy"
       v-if="
         conversation?.platform_type === 'ZALO_OA' && conversation?.client_avatar
       "
@@ -96,6 +104,7 @@ import type { ConversationInfo } from '@/service/interface/app/conversation'
 import type { FacebookCommentPost } from '@/service/interface/app/post'
 import { container } from 'tsyringe'
 import type { PageType } from '@/service/interface/app/page'
+import { clippingParents } from '@popperjs/core'
 
 const $cdn = SingletonCdn.getInst()
 /** Các nền tảng có avatar */
@@ -118,6 +127,8 @@ const $props = withDefaults(
 )
 
 const conversationStore = useConversationStore()
+
+console.log($props.conversation?.platform_type, 'platform_type')
 
 /**thêm hiệu ứng ẩn hiện khi ảnh đang được load */
 const animate_pulse = ref('animate-pulse')
@@ -162,12 +173,19 @@ function removeAnimatePulse() {
 }
 /**tạo url ảnh */
 function loadImageUrl(platform_type?: PageType) {
+  console.log(platform_type, 'platform_type')
   if (platform_type === 'FB_INSTAGRAM')
     return $cdn.igClientAvt(
       $props.conversation?.fb_page_id,
       $props.conversation?.fb_client_id
     )
-
+  if (platform_type === 'TIKTOK') {
+    console.log('hahahahahahah')
+    return $cdn.tiktokClientAvt(
+      $props.conversation?.fb_page_id,
+      $props.conversation?.fb_client_id
+    )
+  }
   return $cdn.fbClientAvt(
     $props.conversation?.fb_page_id,
     $props.conversation?.fb_client_id
