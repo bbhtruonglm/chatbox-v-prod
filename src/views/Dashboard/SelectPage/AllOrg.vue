@@ -24,7 +24,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useOrgStore, usePageStore, useSelectPageStore } from '@/stores'
+import {
+  useOrgStore,
+  usePageStore,
+  useSelectPageStore,
+  usePageManagerStore,
+} from '@/stores'
 import { isEmpty, omitBy, sortBy } from 'lodash'
 import { nextTick, onMounted, provide, ref, watch } from 'vue'
 import { KEY_ADVANCE_SELECT_AGE_FUNCT } from './symbol'
@@ -39,6 +44,7 @@ import { BillingAppGroup } from '@/utils/api/Billing'
 const selectPageStore = useSelectPageStore()
 const pageStore = usePageStore()
 const orgStore = useOrgStore()
+const pageManagerStore = usePageManagerStore()
 
 // /**
 //  * hàm lấy dữ liệu tổ chức và trang
@@ -124,30 +130,22 @@ class Main {
 
     /** Lưu list vào store */
     orgStore.list_group = RES
-    // lưu lại vào reactive để hiển thị
-    // groups.value = RES
-    // nextTick(() => {
-    //   // nếu là group duy nhất và là tk nhân viên thì chọn group đó luôn
-    //   if (is_single_group.value) {
-    //     selected_group_id.value = access_groups.value?.[0]?.group_id || ''
-    //   }
-    //   // tính toán lại độ rộng các nhóm
-    //   group_widths.value = measureAllGroupWidths()
-    //   // cập nhật lại các nhóm hiển thị
-    //   updateGroups()
-    //   // lặp qua các nhóm lưu lại ánh xạ id của từng page với id nhóm của page đó
-    //   // RES?.forEach(group => {
-    //   //   group?.group_pages?.forEach(page_id => {
-    //   //     // nếu không có id page hoặc id nhóm thì thôi
-    //   //     if (!page_id || !group?.group_id || !group?.org_id) return
-    //   //     // lưu ánh xạ từ id page tới id nhóm
-    //   //     pageManagerStore.pape_to_group_map[page_id] = [
-    //   //       ...(pageManagerStore.pape_to_group_map[page_id] || []),
-    //   //       group?.group_id,
-    //   //     ]
-    //   //   })
-    //   // })
-    // })
+
+    // reset lại map
+    pageManagerStore.pape_to_group_map = {}
+
+    // lặp qua các nhóm lưu lại ánh xạ id của từng page với id nhóm của page đó
+    RES?.forEach(group => {
+      group?.group_pages?.forEach(page_id => {
+        // nếu không có id page hoặc id nhóm thì thôi
+        if (!page_id || !group?.group_id || !group?.org_id) return
+        // lưu ánh xạ từ id page tới id nhóm
+        pageManagerStore.pape_to_group_map[page_id] = [
+          ...(pageManagerStore.pape_to_group_map[page_id] || []),
+          group?.group_id,
+        ]
+      })
+    })
   }
 }
 const $main = new Main()

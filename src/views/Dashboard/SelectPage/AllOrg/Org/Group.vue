@@ -182,20 +182,27 @@ const is_single_group = computed(() => {
 
 /** chọn group */
 function selectGroup(e: MouseEvent, group: IGroup, type: 'hidden' | 'visible') {
+  /** chọn group   */
   selected_group_id.value = group?.group_id || ''
 
+  /** chọn group ẩn */
   if (type === 'hidden') {
+    /** chọn group ẩn */
     selected_hidden_group.value = group
+    /** toggle dropdown */
     dropdown_ref.value?.toggleDropdown(e)
   } else {
+    /** reset group ẩn */
     selected_hidden_group.value = {}
   }
 }
 
 /** đo width từng group */
 function measureAllGroupWidths() {
+  /** tạo container ảo */
   const VISTUAL_CONTAINER = document.createElement('div')
 
+  /** style container ảo */
   Object.assign(VISTUAL_CONTAINER.style, {
     position: 'fixed',
     left: '-9999px',
@@ -212,22 +219,34 @@ function measureAllGroupWidths() {
     boxSizing: 'content-box',
   })
 
+  /** thêm các item vào container ảo */
   groups.value?.forEach(group => {
+    /** tạo item */
     const ITEM = document.createElement('div')
+    /** style item */
     ITEM.className = 'max-w-48 truncate py-1 px-3 rounded text-xs'
+    /** nội dung item */
     ITEM.innerText = group?.group_name || ''
+    /** thêm item vào container */
     VISTUAL_CONTAINER.appendChild(ITEM)
   })
 
+  /** thêm container vào body */
   document.body.appendChild(VISTUAL_CONTAINER)
 
+  /** đo width từng item */
   const WIDTHS: number[] = []
+  /** đo width từng item */
   Array.from(VISTUAL_CONTAINER.children).forEach(child => {
+    /** item */
     const EL = child as HTMLElement
+    /** width item */
     WIDTHS.push(EL.offsetWidth)
   })
 
+  /** xóa container */
   document.body.removeChild(VISTUAL_CONTAINER)
+  /** trả về width của từng item */
   return WIDTHS
 }
 
