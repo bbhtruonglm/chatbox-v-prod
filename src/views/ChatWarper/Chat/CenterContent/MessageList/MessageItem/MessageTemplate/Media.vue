@@ -110,7 +110,7 @@ const platform_type = computed(
 /**có sử dụng cnd mới không */
 function isUseNewCdn() {
   // các nền tảng sử dụng cdn mới
-  return ['FB_MESS', 'WEBSITE', 'FB_INSTAGRAM'].includes(
+  return ['FB_MESS', 'WEBSITE', 'FB_INSTAGRAM', 'TIKTOK'].includes(
     platform_type.value || ''
   )
 }
@@ -162,6 +162,9 @@ function getCdnUrl(): string | undefined {
 
   if (platform_type.value === 'FB_INSTAGRAM')
     return $cdn.igMessageMedia($props.message?.fb_page_id, TARGET_ID, 0)
+
+  if (platform_type.value === 'TIKTOK')
+    return $cdn.tiktokMessageMedia($props.message?.fb_page_id, TARGET_ID, 0)
 
   return $cdn.fbMessageMedia($props.message?.fb_page_id, TARGET_ID, 0)
 }
