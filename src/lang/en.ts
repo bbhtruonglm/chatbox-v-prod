@@ -1405,6 +1405,8 @@ const source: Language = {
               pack_use: 'Package in use',
               pack_time: 'Usage time',
               page_amount: 'Page amount',
+
+              last_reset: 'Package last reset',
               staff_amount: 'Staff amount',
               bot: 'Chatbot',
               chat_feature: 'Chat features',
