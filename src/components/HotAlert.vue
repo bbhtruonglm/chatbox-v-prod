@@ -184,7 +184,6 @@ async function getNoti() {
     // } else {
     //   // lấy tất cả các thông báo
     // }
-    list_noti.value = await getAllNoti()
 
     /** call noti theo list org (không tách từng tổ chức nữa) */
     list_noti.value = await getAllNoti()
@@ -208,7 +207,11 @@ async function getAllNoti() {
     /** danh sách các tổ chức */
     const LIST_ORG = orgStore.list_org || []
 
-    /** lặp qua từng tổ chức để lấy danh sách các thông báo */
+    /** Lấy list org id */
+    const ORG_IDS = LIST_ORG.map(item => item.org_id || '')
+    /** nếu không có org ids thì trả về [] */
+    if (isEmpty(ORG_IDS)) return []
+    // lặp qua từng tổ chức để lấy danh sách các thông báo
     // for (const org of LIST_ORG) {
     //   // nếu không có id tổ chức thì thôi qua tổ chức tiếp theo
     //   if (!org.org_id) continue
@@ -223,14 +226,14 @@ async function getAllNoti() {
     //   // thêm vào cuối danh sách
     //   list_noti = [...list_noti, ...RES]
     // }
-    /** Lấy ra ID của tổ chức */
-    const ORG_IDS = LIST_ORG.map(item => item.org_id || '')
-    /** Nếu array k có phần tử */
-    if (isEmpty(ORG_IDS)) return []
-    /** gọi api thông báo theo list org_id */
-    const RES = await get_all_noti(ORG_IDS, 3, { $exists: false }, $props.codes)
-    /** Gán giá trị vừa fetch về vào list noti */
-    list_noti = RES
+    /** dữ liệu api trả về */
+    const RES = await get_all_noti({
+      org_id: ORG_IDS,
+      limit: 30,
+      is_read: { $exists: false },
+      noti_code: $props.codes,
+    })
+    list_noti = RES || []
   } catch (e) {
   } finally {
     return list_noti
