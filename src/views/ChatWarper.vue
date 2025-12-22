@@ -100,8 +100,6 @@ const commonStore = useCommonStore()
 const extensionStore = useExtensionStore()
 const orgStore = useOrgStore()
 
-const { ref_alert_reach_limit } = storeToRefs(commonStore)
-
 /** utils */
 const { t: $t } = useI18n()
 const $router = useRouter()
@@ -117,6 +115,10 @@ const is_focus_chat_tab = ref(true)
 /**ref modal cảnh báo hết gói */
 const ref_alert_reach_quota = ref<InstanceType<typeof AlertWarning>>()
 
+/**ref modal cảnh báo hết giới hạn gói */
+const ref_alert_reach_limit =
+  ref<InstanceType<typeof AlertAccountLimitReached>>()
+
 /** state nội dung modal */
 const alert_state = ref<{ title?: string; description?: string }>({})
 
@@ -126,9 +128,6 @@ watch(
 )
 
 onMounted(() => {
-  /** kiểm tra giới hạn gói */
-  checkOverLimit()
-
   /** lấy thông tin trang để chat */
   $main.getPageInfoToChat()
 
@@ -146,10 +145,16 @@ onMounted(() => {
 
   /** lắng nghe sự kiện blur khỏi tab chat */
   window.addEventListener('blur', checkFocusChatTab)
+
+  /** sync ref global */
+  commonStore.ref_alert_reach_limit = ref_alert_reach_limit.value
 })
 
 /** gọi khi component bị hủy */
 onUnmounted(() => {
+  /** destroy ref global */
+  commonStore.ref_alert_reach_limit = undefined
+
   /** đóng socket */
   $socket.close()
 
@@ -160,12 +165,15 @@ onUnmounted(() => {
   window.removeEventListener('blur', checkFocusChatTab)
 })
 
-/** hàm kiểm tra xem đã vượt giới hạn gói chưa */
-function checkOverLimit() {
-  if (orgStore.isOverLimit()) {
-    ref_alert_reach_limit.value?.toggleModal()
-  }
-}
+watch(
+  () => orgStore.isOverLimit(),
+  is_over => {
+    if (is_over) {
+      ref_alert_reach_limit.value?.openModal()
+    }
+  },
+  { immediate: true }
+)
 
 /**chuyển đến trang dashboard */
 function goDashboard() {
