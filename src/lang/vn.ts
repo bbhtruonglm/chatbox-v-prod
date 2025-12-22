@@ -670,6 +670,8 @@ const source: Language = {
               findding_uid: 'Đang tìm kiếm UID',
             },
             error: {
+              page_deleted:
+                'Một số page có thể đã bị xóa khỏi Tổ chức của bạn, vui lòng quay lại màn chọn trang và lựa chọn lại',
               get_page_info: 'Không tìm thấy dữ liệu trang',
               get_org_info: 'Không tìm thấy dữ liệu tổ chức',
               org_quota_staff:
