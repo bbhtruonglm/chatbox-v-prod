@@ -10,6 +10,7 @@
       loading="lazy"
       v-else-if="page_info?.type === 'FB_INSTAGRAM'"
       :src="loadImageUrl()"
+      @error="onImgError"
       class="w-full h-full"
     />
     <img
@@ -58,6 +59,7 @@ import { SingletonCdn } from '@/utils/helper/Cdn'
 
 import zaloSvg from '@/assets/icons/zalo.svg'
 import WebIcon from '@/components/Icons/Web.vue'
+import instagramSvg from '@/assets/icons/instagram.svg'
 
 import type { IPage } from '@/service/interface/app/page'
 
@@ -70,12 +72,37 @@ const $props = withDefaults(
   }>(),
   {}
 )
+console.log($props.page_info, 'page info')
+
+/**xử lý khi ảnh lỗi */
+function onImgError(e: Event) {
+  const target = e.target as HTMLImageElement
+  const RETRY_COUNT = parseInt(target.dataset.retry || '0')
+
+  if (RETRY_COUNT === 0) {
+    target.dataset.retry = '1'
+    const AVATAR = $props.page_info?.avatar
+    if (AVATAR) {
+      target.src = AVATAR
+      return
+    }
+  }
+
+  if (RETRY_COUNT <= 1) {
+    target.dataset.retry = '2'
+    target.src = instagramSvg
+    return
+  }
+
+  target.onerror = null
+}
 
 /**tạo url ảnh */
 function loadImageUrl(page_id?: string) {
   /**id của trang */
   const PAGE_ID = page_id || $props.page_info?.fb_page_id
 
+  console.log(PAGE_ID, 'page id')
   switch ($props.page_info?.type) {
     case 'ZALO_PERSONAL':
       return $cdn.zlpPageAvt(PAGE_ID)

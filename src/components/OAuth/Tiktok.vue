@@ -24,7 +24,7 @@
       </button>
     </template>
   </EmptyPage>
-  <AlertWarning ref="alert_reach_quota_page_ref" />
+  <AlertRechQuota ref="alert_reach_quota_page_ref" />
 </template>
 <script setup lang="ts">
 import { useCommonStore, useOrgStore } from '@/stores'
@@ -32,7 +32,7 @@ import { WindowAction, type IWindowAction } from '@/utils/helper/Navigation'
 import { container } from 'tsyringe'
 
 import EmptyPage from '@/views/Dashboard/ConnectPage/EmptyPage.vue'
-import AlertWarning from '@/components/AlertModal/AlertWarning.vue'
+import AlertRechQuota from '@/components/AlertModal/AlertRechQuota.vue'
 
 import TiktokIcon from '@/components/Icons/Tiktok.vue'
 import { ref } from 'vue'
@@ -46,7 +46,7 @@ const commonStore = useCommonStore()
 const orgStore = useOrgStore()
 
 /**ref của modal thông báo hết quota */
-const alert_reach_quota_page_ref = ref<InstanceType<typeof AlertWarning>>()
+const alert_reach_quota_page_ref = ref<InstanceType<typeof AlertRechQuota>>()
 
 class Main {
   /**

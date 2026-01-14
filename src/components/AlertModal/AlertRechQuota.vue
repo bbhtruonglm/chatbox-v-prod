@@ -7,12 +7,10 @@
     class_footer="flex justify-between items-center mt-6"
   >
     <template #header>
-      {{ title || $t('v1.view.main.dashboard.org_page.over_quota.title') }}
+      {{ $t('v1.view.main.dashboard.org_page.over_quota.title') }}
     </template>
     <template #body>
-      {{
-        description || $t('v1.view.main.dashboard.chat.error.org_quota_staff')
-      }}
+      {{ $t('v1.view.main.dashboard.chat.error.org_quota_staff') }}
     </template>
     <template #footer>
       <button
@@ -35,16 +33,6 @@ import { ref } from 'vue'
 
 import Alert from '@/components/Alert.vue'
 
-const $props = withDefaults(
-  defineProps<{
-    /**tiêu đề modal */
-    title?: string
-    /**nội dung modal */
-    description?: string
-  }>(),
-  {}
-)
-
 const $emit = defineEmits(['close_modal', 'confirm'])
 
 /**modal xác nhận huỷ trang */
@@ -56,17 +44,17 @@ function toggleModal() {
 }
 /**tắt modal */
 function closeModal() {
-  /** gửi sự kiện đóng modal */
+  // gửi sự kiện đóng modal
   $emit('close_modal')
 
-  /** ẩn modal */
+  // ẩn modal
   toggleModal()
 }
 function confirm() {
-  /** gửi sự kiện xác nhận */
+  // gửi sự kiện xác nhận
   $emit('confirm')
 
-  /** ẩn modal */
+  // ẩn modal
   toggleModal()
 }
 

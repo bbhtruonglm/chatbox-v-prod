@@ -874,8 +874,6 @@ const source: Language = {
               findding_uid: 'Searching for UID',
             },
             error: {
-              page_deleted:
-                'Some pages may have been deleted from your organization, please go back to the page selection screen and select again',
               get_page_info: 'Page data not found',
               get_org_info: 'Organization data not found',
               org_quota_staff:
